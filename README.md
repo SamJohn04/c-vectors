@@ -30,6 +30,14 @@ vector_append(v, e);
 
 ---
 
+You may see the length of the stored vector using vector_len
+
+```
+vector_len(v); // < this will return 1, since we only have 1 element
+```
+
+---
+
 You may access the elements similar to array accesses.
 
 ```
