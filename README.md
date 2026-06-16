@@ -4,7 +4,7 @@ An implementation of vectors (dynamic arrays) in C. Functions as a single file y
 
 ## Usage
 
-Copy the `vectors.h` file into directory to your project.
+Copy the `vectors.h` file directory to your project.
 
 When you wish to declare a vector named `v` of type `T`, it is declared as such:
 
