@@ -1,6 +1,7 @@
 # Vectors In C
 
-An implementation of vectors (dynamic arrays) in C. Functions as a single file you can copy and paste.
+An implementation of vectors (dynamic arrays) in C.
+Functions as a single file you can copy and paste.
 
 ## Usage
 
@@ -14,7 +15,8 @@ T* v = NULL;
 
 ---
 
-You may declare your vector with a known size, say `size`. If you do not do this `vector_append` gives you a vector with the default size.
+You may declare your vector with a known size, say `size`.
+If you do not do this, `vector_append` gives you a vector with the default size.
 
 ```
 vector_create_with_capacity(v, size);
@@ -30,7 +32,7 @@ vector_append(v, e);
 
 ---
 
-You may see the length of the stored vector using vector_len
+You may see the length of the stored vector using vector_len:
 
 ```
 vector_len(v); // < this will return 1, since we only have 1 element
@@ -38,7 +40,7 @@ vector_len(v); // < this will return 1, since we only have 1 element
 
 ---
 
-You may access the elements similar to array accesses.
+You may access the elements similar to array accesses:
 
 ```
 v[0]; // < this will be e
@@ -46,7 +48,7 @@ v[0]; // < this will be e
 
 ---
 
-You must free the elements you have declared using `vector_free`
+You must free the elements you have declared using `vector_free`:
 
 ```
 vector_free(v);
@@ -78,3 +80,11 @@ int main() {
 }
 ```
 
+## Limitations
+
+`vectors.h` functions by prepending the produced array with a header.
+When the array overflows, the vector is realloced.
+This reallocation may be at a different memory address.
+
+Therefore, passing a vector into a function where it could be appended
+leads to undefined behaviour.
