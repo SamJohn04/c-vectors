@@ -87,4 +87,5 @@ When the array overflows, the vector is realloced.
 This reallocation may be at a different memory address.
 
 Therefore, passing a vector into a function where it could be appended
+**and not returning the realloced vector**
 leads to undefined behaviour.
