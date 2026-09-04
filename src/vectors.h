@@ -18,49 +18,51 @@ typedef struct {
 // Use this if you do not want VECTOR_INITIAL_CAPACITY picked for you
 // If you're fine with not choosing an initial capacity yourself,
 // just call vector_append directly
-#define vector_create_with_capacity(vector, max_size)                                       \
-  do {                                                                                      \
-    _vct_header_t* header = malloc(sizeof(_vct_header_t) + sizeof(*(vector)) * (max_size)); \
-    header->length = 0;                                                                     \
-    header->capacity = max_size;                                                            \
-    vector = (void*)(header+1);                                                             \
-  } while(0)
+#define vector_create_with_capacity(vector, max_size)                          \
+  do {                                                                         \
+    _vct_header_t *header =                                                    \
+        malloc(sizeof(_vct_header_t) + sizeof(*(vector)) * (max_size));        \
+    header->length = 0;                                                        \
+    header->capacity = max_size;                                               \
+    vector = (void *)(header + 1);                                             \
+  } while (0)
 
 // Get the length of a vector
 // Must give the start of the vector
-#define vector_len(vector) ((_vct_header_t*)(vector) - 1)->length
+#define vector_len(vector) ((_vct_header_t *)(vector) - 1)->length
 
 // Append an element to the vector
 // Must give the start of the vector and the element
-#define vector_append(vector, element)                                                                     \
-  do {                                                                                                     \
-    if ((vector) == NULL) {                                                                                \
-      vector_create_with_capacity(vector, VECTOR_INITIAL_CAPACITY);                                        \
-    }                                                                                                      \
-    _vct_header_t* header = ((_vct_header_t*)(vector) - 1);                                                \
-    header->length++;                                                                                      \
-    if (header->length >= header->capacity) {                                                              \
-      header->capacity *= 2;                                                                               \
-      header            = realloc(header, sizeof(_vct_header_t) + sizeof(*(vector)) * (header->capacity)); \
-      vector            = (void*)(header+1);                                                               \
-    }                                                                                                      \
-    (vector)[header->length - 1] = (element);                                                              \
+#define vector_append(vector, element)                                         \
+  do {                                                                         \
+    if ((vector) == NULL) {                                                    \
+      vector_create_with_capacity(vector, VECTOR_INITIAL_CAPACITY);            \
+    }                                                                          \
+    _vct_header_t *header = ((_vct_header_t *)(vector) - 1);                   \
+    header->length++;                                                          \
+    if (header->length >= header->capacity) {                                  \
+      header->capacity *= 2;                                                   \
+      header = realloc(header, sizeof(_vct_header_t) +                         \
+                                   sizeof(*(vector)) * (header->capacity));    \
+      vector = (void *)(header + 1);                                           \
+    }                                                                          \
+    (vector)[header->length - 1] = (element);                                  \
   } while (0)
 
 // Remove the last element of the vector *without* returning it
-#define vector_remove_last(vector) ((_vct_header_t*)(vector) - 1)->length--
+#define vector_remove_last(vector) ((_vct_header_t *)(vector) - 1)->length--
 
 // Remove any element of the vector *without* returning it
-#define vector_remove(vector, index)                         \
-  do {                                                       \
-    for (int i = (index); i < vector_len(vector) - 1; i++) { \
-      (vector)[i] = (vector)[i+1];                           \
-    }                                                        \
-    vector_remove_last(vector);                              \
+#define vector_remove(vector, index)                                           \
+  do {                                                                         \
+    for (int i = (index); i < vector_len(vector) - 1; i++) {                   \
+      (vector)[i] = (vector)[i + 1];                                           \
+    }                                                                          \
+    vector_remove_last(vector);                                                \
   } while (0)
 
 // free the vector
 // Must give the start of the vector
-#define vector_free(vector) free((_vct_header_t*)(vector) - 1)
+#define vector_free(vector) free((_vct_header_t *)(vector) - 1)
 
 #endif // VECTORS_H
