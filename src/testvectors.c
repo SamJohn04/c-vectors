@@ -2,15 +2,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define ANSI_COLOR_RED "\x1b[31m"
-#define ANSI_COLOR_GREEN "\x1b[32m"
-#define ANSI_COLOR_RESET "\x1b[0m"
-
 #define assert(condition, fail_message)                                        \
   if (!(condition)) {                                                          \
     fflush(stdout);                                                            \
-    fprintf(stderr, ANSI_COLOR_RED "\uf00d %s\n" ANSI_COLOR_RESET,             \
-            fail_message);                                                     \
+    fprintf(stderr, "<console color-red>\uf00d %s</console>\n", fail_message); \
     return 1;                                                                  \
   }
 
@@ -125,5 +120,5 @@ int *get_vector(int n) {
 bool put_vector(int *vector) { return vector != NULL; }
 
 void display_success(const char *end_of_line) {
-  printf(ANSI_COLOR_GREEN "\uf42e%s" ANSI_COLOR_RESET, end_of_line);
+  printf("<console color-green>\uf42e</console>%s", end_of_line);
 }
