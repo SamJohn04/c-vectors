@@ -1,5 +1,6 @@
 /*
  * VECTORS_H lets the user use dynamic arrays in C.
+ * Version 1.0.0
  */
 
 #ifndef VECTORS_H
