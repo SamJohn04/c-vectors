@@ -46,6 +46,15 @@ You may access the elements similar to array accesses:
 v[0]; // < this will be e
 ```
 
+If you wish to be robust, you may access it with `vector_get`.
+The plus point when doing this an additional safety check.
+
+```
+vector_get(v, 0); // < this will be e
+vector_get(v, 100); // out of bounds: this will error if it's a debug build
+                    // and return 0 in production
+```
+
 ---
 
 You must free the elements you have declared using `vector_free`:
@@ -53,6 +62,8 @@ You must free the elements you have declared using `vector_free`:
 ```
 vector_free(v);
 ```
+
+> Important!: function arguments must not have side effects
 
 ## Example
 

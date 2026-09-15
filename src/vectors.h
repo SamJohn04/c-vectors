@@ -1,11 +1,12 @@
 /*
  * VECTORS_H lets the user use dynamic arrays in C.
- * Version 1.0.0
+ * Version 1.1.0
  */
 
 #ifndef VECTORS_H
 #define VECTORS_H
 
+#include <assert.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -14,6 +15,8 @@ typedef struct {
 } _vct_header_t;
 
 #define VECTOR_INITIAL_CAPACITY 256
+
+#define _vct_get_header(vector) ((_vct_header_t *)(vector) - 1)
 
 // Create a vector with a known maximum size
 // Use this if you do not want VECTOR_INITIAL_CAPACITY picked for you
@@ -30,7 +33,7 @@ typedef struct {
 
 // Get the length of a vector
 // Must give the start of the vector
-#define vector_len(vector) ((_vct_header_t *)(vector) - 1)->length
+#define vector_len(vector) _vct_get_header(vector)->length
 
 // Append an element to the vector
 // Must give the start of the vector and the element
@@ -39,7 +42,7 @@ typedef struct {
     if ((vector) == NULL) {                                                    \
       vector_create_with_capacity(vector, VECTOR_INITIAL_CAPACITY);            \
     }                                                                          \
-    _vct_header_t *header = ((_vct_header_t *)(vector) - 1);                   \
+    _vct_header_t *header = _vct_get_header(vector);                           \
     header->length++;                                                          \
     if (header->length >= header->capacity) {                                  \
       header->capacity *= 2;                                                   \
@@ -50,8 +53,21 @@ typedef struct {
     (vector)[header->length - 1] = (element);                                  \
   } while (0)
 
+// Get the index'th element, if it exists
+// If it doesn't and you're in DEBUG build, it errors out
+// If it doesn't and you're in PROD build, it returns 0
+#define vector_get(vector, index)                                              \
+  assert((index) >= 0 && (index) < _vct_get_header(vector)->length),           \
+      (index) >= 0 && (index) < _vct_get_header(vector)->length                \
+          ? (vector)[(index)]                                                  \
+          : 1
+
+// Pop the last element of the vector, returning it
+#define vector_pop(vector)                                                     \
+  (_vct_get_header(vector)->length--, vector[_vct_get_header(vector)->length])
+
 // Remove the last element of the vector *without* returning it
-#define vector_remove_last(vector) ((_vct_header_t *)(vector) - 1)->length--
+#define vector_remove_last(vector) _vct_get_header(vector)->length--
 
 // Remove any element of the vector *without* returning it
 #define vector_remove(vector, index)                                           \
@@ -64,6 +80,6 @@ typedef struct {
 
 // free the vector
 // Must give the start of the vector
-#define vector_free(vector) free((_vct_header_t *)(vector) - 1)
+#define vector_free(vector) free(_vct_get_header(vector))
 
 #endif // VECTORS_H
