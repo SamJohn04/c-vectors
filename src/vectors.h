@@ -60,7 +60,7 @@ typedef struct {
   assert((index) >= 0 && (index) < _vct_get_header(vector)->length),           \
       (index) >= 0 && (index) < _vct_get_header(vector)->length                \
           ? (vector)[(index)]                                                  \
-          : 1
+          : 0
 
 // Pop the last element of the vector, returning it
 #define vector_pop(vector)                                                     \
