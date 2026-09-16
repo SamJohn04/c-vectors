@@ -1,5 +1,4 @@
 #include "vectors.h"
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -154,7 +153,6 @@ bool vector_get_test(const char *end_of_line) {
     printf("<console color-yellow>-</console>%s", end_of_line);
     return 0;
   } else if (id == 0) {
-#undef NDEBUG
     int devnull = open("/dev/null", O_WRONLY);
     if (devnull != -1) {
       dup2(devnull, STDOUT_FILENO);
@@ -182,11 +180,9 @@ bool vector_get_test(const char *end_of_line) {
 }
 
 bool vector_get_test_prod(const char *end_of_line) {
-#define NDEBUG 1
   int *v = NULL;
   vector_append(v, 2);
   vector_assert(vector_get(v, 1) == 0, "vector_get prod is wrong");
-#undef NDEBUG
   return 0;
 }
 
