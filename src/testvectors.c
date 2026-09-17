@@ -108,7 +108,7 @@ int test_basics(const char *end_of_line) {
   vector_free(n2);
 
 #ifdef NDEBUG
-  printf("test: get vector fail: prod build                \t");
+  printf("test: get vector fail: prod build                 \t");
   if (vector_get_test_prod(end_of_line)) {
     return 1;
   }
@@ -153,13 +153,13 @@ bool vector_get_test(const char *end_of_line) {
     printf("<console color-yellow>-</console>%s", end_of_line);
     return 0;
   } else if (id == 0) {
+    // is child
     int devnull = open("/dev/null", O_WRONLY);
     if (devnull != -1) {
       dup2(devnull, STDOUT_FILENO);
       dup2(devnull, STDERR_FILENO);
       close(devnull);
     }
-    // is child
     int *v = NULL;
     vector_append(v, 2);
     vector_get(v, 1);
