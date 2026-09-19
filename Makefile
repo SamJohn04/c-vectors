@@ -10,12 +10,12 @@ test: always
 
 	# DEBUG
 
-	$(CC) -o $(BUILD_DIR)/test.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR)
+	$(CC) -o $(BUILD_DIR)/test.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR) -Wall -Werror
 	$(BUILD_DIR)/test.out
 
 	# PROD
 
-	$(CC) -o $(BUILD_DIR)/test-prod.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR) -DNDEBUG
+	$(CC) -o $(BUILD_DIR)/test-prod.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR) -DNDEBUG -Wall -Werror
 	$(BUILD_DIR)/test-prod.out
 
 clean: always

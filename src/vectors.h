@@ -15,7 +15,8 @@
  *
  * vector_create_with_capacity(vector, max_size) - create a vector `vector` with
  * an initial maximum capacity of `max_size`. This is not necessary if it is
- * equal to VECTOR_INITIAL_CAPACITY
+ * equal to VECTOR_INITIAL_CAPACITY. A max_size <= 0 will error out in debug and
+ * return a vector of default size in prod
  *
  * vector_len(vector) - get the length (of type size_t) of the vector
  *
@@ -32,11 +33,11 @@
  * If the vector is empty and you're in a prod build, it returns 0
  *
  * vector_remove_last(vector) - Remove the last element of the vector *without*
- * returning it.
+ * returning it. Does nothing if the vector is empty.
  * Side effect: returns the old length; and 0 if there was nothing to remove
  *
  * vector_remove(vector, index) - Remove any element of the vector *without*
- * returning it. If index >= length, then this functions as a noop
+ * returning it. If index < 0 or index >= length, then this functions as a noop
  *
  * vector_free(vector) - free the vector. This should be called instead of
  * free(vector).
@@ -46,6 +47,7 @@
 #define VECTORS_H
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -59,21 +61,29 @@ typedef struct {
 
 #define _vct_get_header(vector) ((_vct_header_t *)(vector) - 1)
 
-// Create a vector with a known maximum size
-// Use this if you do not want VECTOR_INITIAL_CAPACITY picked for you
+// Create a vector with a known maximum size.
+// Use this if you do not want VECTOR_INITIAL_CAPACITY picked for you.
 // If you're fine with not choosing an initial capacity yourself,
-// just call vector_append directly
+// just call vector_append directly.
+// A max_size <= 0 errors out in debug mode and sets to the default capacity on
+// prod
 #define vector_create_with_capacity(vector, max_size)                          \
   do {                                                                         \
-    _vct_header_t *header =                                                    \
-        malloc(sizeof(_vct_header_t) + sizeof(*(vector)) * (max_size));        \
-    header->length = 0;                                                        \
-    header->capacity = max_size;                                               \
-    vector = (void *)(header + 1);                                             \
+    int64_t _vct_capacity = (int64_t)(max_size);                               \
+    assert(_vct_capacity > 0);                                                 \
+    if (_vct_capacity <= 0) {                                                  \
+      _vct_capacity = VECTOR_INITIAL_CAPACITY;                                 \
+    }                                                                          \
+    _vct_header_t *_vct_header =                                               \
+        malloc(sizeof(_vct_header_t) + sizeof(*(vector)) * (_vct_capacity));   \
+    _vct_header->length = 0;                                                   \
+    _vct_header->capacity = _vct_capacity;                                     \
+    vector = (void *)(_vct_header + 1);                                        \
   } while (0)
 
-// Get the length of a vector
-#define vector_len(vector) _vct_get_header(vector)->length
+// Get the length of a vector. Passing in NULL gets you 0
+#define vector_len(vector)                                                     \
+  ((vector) == NULL ? 0 : _vct_get_header(vector)->length)
 
 // Append an element to the vector
 // If vector is NULL, it creates tthe vector with VECTOR_INITIAL_CAPACITY.
@@ -83,51 +93,51 @@ typedef struct {
     if ((vector) == NULL) {                                                    \
       vector_create_with_capacity(vector, VECTOR_INITIAL_CAPACITY);            \
     }                                                                          \
-    _vct_header_t *header = _vct_get_header(vector);                           \
-    header->length++;                                                          \
-    if (header->length >= header->capacity) {                                  \
-      header->capacity *= 2;                                                   \
-      header = realloc(header, sizeof(_vct_header_t) +                         \
-                                   sizeof(*(vector)) * (header->capacity));    \
-      vector = (void *)(header + 1);                                           \
+    _vct_header_t *_vct_header = _vct_get_header(vector);                      \
+    _vct_header->length++;                                                     \
+    if (_vct_header->length >= _vct_header->capacity) {                        \
+      _vct_header->capacity *= 2;                                              \
+      _vct_header = realloc(_vct_header,                                       \
+                            sizeof(_vct_header_t) +                            \
+                                sizeof(*(vector)) * (_vct_header->capacity));  \
+      vector = (void *)(_vct_header + 1);                                      \
     }                                                                          \
-    (vector)[header->length - 1] = (element);                                  \
+    (vector)[_vct_header->length - 1] = (element);                             \
   } while (0)
 
 // Get the index'th element, if it exists
 // If it doesn't and you're in a debug build, it errors out
 // If it doesn't and you're in a prod build, it returns 0
 #define vector_get(vector, index)                                              \
-  assert((index) >= 0 && (index) < _vct_get_header(vector)->length),           \
-      (index) >= 0 && (index) < _vct_get_header(vector)->length                \
-          ? (vector)[(index)]                                                  \
-          : 0
+  (assert((index) >= 0 && (index) < vector_len(vector)),                       \
+   (index) >= 0 && (index) < vector_len(vector) ? (vector)[(index)] : 0)
 
 // Pop the last element of the vector, returning it
 // If the vector is empty and you're in a debug build, it errors out
 // If the vector is empty and you're in a prod build, it returns 0
 #define vector_pop(vector)                                                     \
   (assert(vector_len(vector) > 0),                                             \
-   vector_len(vector) > 0 ? vector[--vector_len(vector)] : 0)
+   vector_len(vector) > 0 ? vector[--_vct_get_header(vector)->length] : 0)
 
 // Remove the last element of the vector *without* returning it
 #define vector_remove_last(vector)                                             \
-  vector_len(vector) > 0 ? vector_len(vector)-- : 0
+  vector_len(vector) > 0 ? _vct_get_header(vector)->length-- : 0
 
 // Remove any element of the vector *without* returning it
 #define vector_remove(vector, index)                                           \
   do {                                                                         \
-    int idx = (index);                                                         \
-    for (int i = idx; i < vector_len(vector) - 1; i++) {                       \
+    int _vct_idx = (index);                                                    \
+    if ((vector) == NULL || _vct_idx < 0 || _vct_idx >= vector_len(vector)) {  \
+      break;                                                                   \
+    }                                                                          \
+    for (int i = _vct_idx; i < vector_len(vector) - 1; i++) {                  \
       (vector)[i] = (vector)[i + 1];                                           \
     }                                                                          \
-    if ((idx) < vector_len(vector)) {                                          \
-      vector_remove_last(vector);                                              \
-    }                                                                          \
+    vector_remove_last(vector);                                                \
   } while (0)
 
 // free the vector.
 // This should be called instead of free(vector)
-#define vector_free(vector) free(_vct_get_header(vector))
+#define vector_free(vector) (vector) != NULL ? free(_vct_get_header(vector)) : 0
 
 #endif // VECTORS_H
