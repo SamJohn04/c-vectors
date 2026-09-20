@@ -15,7 +15,7 @@ test: always
 
 	# PROD
 
-	$(CC) -o $(BUILD_DIR)/test-prod.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR) -DNDEBUG -Wall -Werror
+	$(CC) -o $(BUILD_DIR)/test-prod.out $(BUILD_DIR)/testvectors.c -I$(SRC_DIR) -DNDEBUG -Wall -Werror -O3
 	$(BUILD_DIR)/test-prod.out
 
 clean: always

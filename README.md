@@ -3,9 +3,12 @@
 An implementation of vectors (dynamic arrays) in C.
 Functions as a single file you can copy and paste.
 
+This is an stb-style library, under the MIT License.
+For more information, check the LICENSE.
+
 ## Usage
 
-Copy the `vectors.h` file directory to your project.
+Copy the `vectors.h` file into your project.
 
 When you wish to declare a vector named `v` of type `T`, it is declared as such:
 
@@ -15,7 +18,7 @@ T* v = NULL;
 
 ---
 
-You may declare your vector with a known size, say `size`.
+You may initialize your vector with a known size, say `size`.
 If you do not do this, `vector_append` gives you a vector with the default size.
 
 ```
@@ -46,13 +49,43 @@ You may access the elements similar to array accesses:
 v[0]; // < this will be e
 ```
 
-If you wish to be robust, you may access it with `vector_get`.
+However, the more robust way to access it is with `vector_get`.
 The plus point when doing this an additional safety check.
 
 ```
 vector_get(v, 0); // < this will be e
 vector_get(v, 100); // out of bounds: this will error if it's a debug build
                     // and return 0 in production
+```
+
+---
+
+You may pop (remove and return) the last element of the vector with `vector_pop`.
+
+```
+vector_pop(v); // < this will be e
+vector_len(v); // this will now return 0, since e was already popped
+```
+
+---
+
+You may remove the last element with `vector_remove_last`.
+
+```
+// assume a vector v1 of length 5: [1, 2, 3, 4, 5]
+vector_remove_last(v1);
+vector_len(v1); // this will now return 4
+// v1 = [1, 2, 3, 4]
+```
+
+---
+
+You may remove any element with `vector_remove`.
+
+```
+// v1 = [1, 2, 3, 4]
+vector_remove(v1, 1);
+// v1 = [1, 3, 4]
 ```
 
 ---
@@ -64,6 +97,12 @@ vector_free(v);
 ```
 
 > Important!: function arguments must not have side effects
+
+> Note: `debug` and `prod` refers to whether the macro NDEBUG is unset or set.
+
+> Note: "Side effects" are the unintended results of the code that have been documented.
+These may change without further notice when there is a major version bump.
+
 
 ## Example
 
@@ -84,7 +123,7 @@ int main() {
     } while (ch);
 
     for (int i = 0; i < vector_len(numbers); i++) {
-        printf("Number %d: %d\n", i, numbers[i]);
+        printf("Number %d: %d\n", i, vector_get(numbers, i));
     }
 
     vector_free(numbers);
