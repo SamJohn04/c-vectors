@@ -1,7 +1,6 @@
 #include "vectors.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #if defined(__unix__) || defined(__APPLE__)
 
